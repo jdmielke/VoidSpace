@@ -35,6 +35,7 @@ import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.Texture;
@@ -63,8 +64,8 @@ public class Game implements Runnable {
 
 	private Texture background;
 
-	private int width = 800;
-	private int height = 600;
+	public static int width = 1280;
+	public static int height = 960;
 
 	public static Player player;
 	public static Pointer pointer;
@@ -106,18 +107,25 @@ public class Game implements Runnable {
 			lastFpsTime = 0;
 			fps = 0;
 		}
-
+		
+		GL11.glPushMatrix();
+		moveCamera();
 		drawBackground();
 		drawPlayerFire(delta);
 		drawPlayer(delta);
 		drawPointer();
 		debugInfo();
-
+		GL11.glPopMatrix();
+		
+	}
+	
+	private void moveCamera() {
+		GL11.glTranslatef(-(player.x - width/2),-(player.y - height/2), 0);
 	}
 	
 	private void drawPlayerFire(long delta) {
 		if(Mouse.isButtonDown(0) && IcarusPrimaryWeapon.canFire()) {
-			Player.shotsFired.add(new IcarusPrimaryWeapon(1f, 400, (long)250));
+			Player.shotsFired.add(new IcarusPrimaryWeapon(1f, 400, (long)50));
 		}
 		for(Iterator<IcarusPrimaryWeapon> iterator = Player.shotsFired.iterator(); iterator.hasNext();) {
 			IcarusPrimaryWeapon shot = iterator.next();
@@ -186,9 +194,9 @@ public class Game implements Runnable {
 			player = new Player(Sprite.icarus, width / 2, height / 2);
 			pointer = new Pointer(Sprite.pointer1);
 
-			// makes mouse invisible for later
+			// makes mouse invisible
 			Mouse.setNativeCursor(new Cursor(1, 1, 0, 0, 1, BufferUtils.createIntBuffer(1), null));
-
+			//setup text for debugging
 			Font awtFont = new Font("Times New Roman", Font.PLAIN, 12); 
 			font = new TrueTypeFont(awtFont, true); 
 		} catch (LWJGLException le) {
@@ -241,10 +249,10 @@ public class Game implements Runnable {
 	}
 
 	private void debugInfo() {
-		font.drawString(600, 500, "ship x: " + player.getX() + " y: " + player.getY(), Color.yellow);
-		font.drawString(600, 480, "cursor x: " + pointer.getX() + " y: " + pointer.getY(),
+		font.drawString(200 + player.getX(), player.getY(), "ship x: " + player.getX() + " y: " + player.getY(), Color.yellow);
+		font.drawString(200 + player.getX(), 15 + player.getY(), "cursor x: " + pointer.getX() + " y: " + pointer.getY(),
 				Color.yellow);
-		font.drawString(600, 460, "angle: " + player.getRotation(), Color.yellow);
+		font.drawString(200 + player.getX(), 30 + player.getY(), "angle: " + player.getRotation(), Color.yellow);
 	}
 
 	public static void main(String[] args) {

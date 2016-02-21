@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class Sprite {
 
 	public static Sprite icarus = new Sprite(SpriteSheet.playerShips, 32, 1, 0);
-	public static Sprite icarusPrimaryFire = new Sprite(SpriteSheet.weaponFire, 8, 0, 0);
+	public static Sprite icarusPrimaryFire = new Sprite(SpriteSheet.weaponFire, 16, 0, 0);
 	public static Sprite pointer1 = new Sprite(SpriteSheet.pointers, 16, 0, 0);
 
 	private static final int SCALE = 2;
