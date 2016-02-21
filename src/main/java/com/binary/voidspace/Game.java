@@ -24,21 +24,25 @@ import static org.lwjgl.opengl.GL11.glTexCoord2f;
 import static org.lwjgl.opengl.GL11.glVertex2f;
 import static org.lwjgl.opengl.GL11.glViewport;
 
+import java.awt.Font;
 import java.io.IOException;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
+import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
+import com.binary.voidspace.entity.Pointer;
 import com.binary.voidspace.entity.mob.Player;
 import com.binary.voidspace.graphics.Sprite;
-import com.binary.voidspace.level.Level;
 
 public class Game implements Runnable {
 
@@ -49,17 +53,19 @@ public class Game implements Runnable {
 
 	private Thread gameThread;
 	
+	private TrueTypeFont font;
+	
 	public long lastFrame;
 	private long lastFpsTime;
 	private int fps;
 
-	public Level level;
 	private Texture background;
 	
 	private int width = 800;
 	private int height = 600;
 	
 	private Player player;
+	public static Pointer pointer;
 	
 	public Game() {
 
@@ -77,7 +83,7 @@ public class Game implements Runnable {
 	public void run() {
 		initialize();
 
-		while (running) {
+		while (running && !Display.isCloseRequested()) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glLoadIdentity();
 			renderFrame();
@@ -100,23 +106,35 @@ public class Game implements Runnable {
 		}
 		
 		drawBackground();
-		//player
+		drawPlayer(delta);
+		drawPointer();
+		debugInfo();
+		
+	}
+	
+	private void drawPointer() {
+		pointer.generatePosition();
+		pointer.draw();
+	}
+	
+	private void drawPlayer(float delta) {
 		player.generatePosition();
 		player.move(delta/1000);
 		player.draw();
+		player.generateAngle();
 	}
 	
 	private void drawBackground() {
 		Color.white.bind();
 		background.bind();
 		glBegin(GL_QUADS);
-		glTexCoord2f(0,(float)background.getImageHeight()/background.getTextureHeight());
-		glVertex2f(0, 0);
-		glTexCoord2f((float)background.getImageWidth()/background.getTextureWidth(),(float)background.getImageHeight()/background.getTextureHeight());
-		glVertex2f(width, 0);
-		glTexCoord2f((float)background.getImageWidth()/background.getTextureWidth(),0);
-		glVertex2f(width, height);
 		glTexCoord2f(0,0);
+		glVertex2f(0, 0);
+		glTexCoord2f((float)background.getImageWidth()/background.getTextureWidth(),0);
+		glVertex2f(width, 0);
+		glTexCoord2f((float)background.getImageWidth()/background.getTextureWidth(),(float)background.getImageHeight()/background.getTextureHeight());
+		glVertex2f(width, height);
+		glTexCoord2f(0,(float)background.getImageHeight()/background.getTextureHeight());
 		glVertex2f(0, height);
 		glEnd();
 	}
@@ -124,11 +142,7 @@ public class Game implements Runnable {
 	public synchronized void stop() {
 		running = false;
 		Display.destroy();
-		try{
-			gameThread.join();
-		}catch(InterruptedException e){
-			e.printStackTrace();
-		}
+		System.exit(0);
 	}
 
 	public void initialize() {
@@ -137,7 +151,6 @@ public class Game implements Runnable {
 			Display.setTitle(WINDOW_TITLE);
 			Display.setFullscreen(false);
 			Display.create();
-			Mouse.setGrabbed(true);
 			
 			glEnable(GL_TEXTURE_2D);
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -146,12 +159,19 @@ public class Game implements Runnable {
 			glDisable(GL_DEPTH_TEST);
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
-			glOrtho(0, width, 0, height, 1, -1);
+			glOrtho(0, width, height, 0, 1, -1);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 			glViewport(0, 0, width, height);
 			
-			player = new Player(Sprite.playerShip1, 400, 400);
+			player = new Player(Sprite.playerShip1, width/2, height/2);
+			pointer = new Pointer(Sprite.pointer1);
+			
+			//makes mouse invisible for later
+			Mouse.setNativeCursor(new Cursor(1,1,0,0,1, BufferUtils.createIntBuffer(1), null));
+			
+			Font awtFont = new Font("Times New Roman", Font.PLAIN, 12); //name, style (PLAIN, BOLD, or ITALIC), size
+			font = new TrueTypeFont(awtFont, true); //base Font, anti-aliasing true/false
 			
 		} catch(LWJGLException le) {
 			System.out.println("Game exiting - exception in initialization:");
@@ -161,7 +181,7 @@ public class Game implements Runnable {
 		}
 		
 		try {
-			background = TextureLoader.getTexture(TEXTURE_FORMAT_PNG, ResourceLoader.getResourceAsStream("/resources/textures/emptySpaceBackground.png"));
+			background = TextureLoader.getTexture(TEXTURE_FORMAT_PNG, ResourceLoader.getResourceAsStream("textures/emptySpaceBackground.png"));
 			System.out.println("Texture loaded: "+background);
             System.out.println(">> Image width: "+background.getImageWidth());
             System.out.println(">> Image height: "+background.getImageHeight());
@@ -199,6 +219,12 @@ public class Game implements Runnable {
 	    int delta = (int) (time - lastFrame);
 	    lastFrame = time;
 	    return delta;
+	}
+	
+	private void debugInfo() {
+		font.drawString(600, 500, "ship x: " + player.getX() + " y: " + player.getY(), Color.yellow);
+		font.drawString(600, 480, "cursor x: " + pointer.getX() + " y: " + pointer.getY(), Color.yellow);
+		font.drawString(600, 460, "angle: " + player.getRotation(), Color.yellow);
 	}
 
 	public static void main(String[] args) {
