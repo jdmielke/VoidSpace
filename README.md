@@ -1,3 +1,6 @@
+VoidSpace
+=========
+
 Description
 -----------
 
@@ -9,11 +12,10 @@ VoidSpace is being created as a bullet hell space mmo. The Core idea behind the 
 Ship Types
 ----------
 
-Icarus
-------
+### Icarus
 
 The most common ship type
-Range: Average
-Speed: Average
-Main Weapon: Dual Burst Lasers
-Secondary: Homing Missiles
+* Range: Average
+* Speed: Average
+* Main Weapon: Dual Burst Lasers
+* Secondary: Homing Missiles
