@@ -26,6 +26,7 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -40,6 +41,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
+import com.binary.voidspace.entity.IcarusPrimaryWeapon;
 import com.binary.voidspace.entity.Pointer;
 import com.binary.voidspace.entity.mob.Player;
 import com.binary.voidspace.graphics.Sprite;
@@ -64,7 +66,7 @@ public class Game implements Runnable {
 	private int width = 800;
 	private int height = 600;
 
-	private Player player;
+	public static Player player;
 	public static Pointer pointer;
 
 	public Game() {
@@ -95,7 +97,7 @@ public class Game implements Runnable {
 	public void renderFrame() {
 		Display.setVSyncEnabled(true);
 
-		float delta = getDelta();
+		long delta = getDelta();
 		lastFpsTime += delta;
 		fps++;
 
@@ -106,10 +108,26 @@ public class Game implements Runnable {
 		}
 
 		drawBackground();
+		drawPlayerFire(delta);
 		drawPlayer(delta);
 		drawPointer();
 		debugInfo();
 
+	}
+	
+	private void drawPlayerFire(long delta) {
+		if(Mouse.isButtonDown(0) && IcarusPrimaryWeapon.canFire()) {
+			Player.shotsFired.add(new IcarusPrimaryWeapon(1f, 400, (long)250));
+		}
+		for(Iterator<IcarusPrimaryWeapon> iterator = Player.shotsFired.iterator(); iterator.hasNext();) {
+			IcarusPrimaryWeapon shot = iterator.next();
+			if(shot.isRemoved()) {
+				iterator.remove();
+			} else {
+				shot.move(delta);
+				shot.draw();
+			}
+		}
 	}
 
 	private void drawPointer() {
@@ -165,7 +183,7 @@ public class Game implements Runnable {
 			glLoadIdentity();
 			glViewport(0, 0, width, height);
 
-			player = new Player(Sprite.playerShip1, width / 2, height / 2);
+			player = new Player(Sprite.icarus, width / 2, height / 2);
 			pointer = new Pointer(Sprite.pointer1);
 
 			// makes mouse invisible for later
@@ -211,13 +229,13 @@ public class Game implements Runnable {
 		return false;
 	}
 
-	public long getTime() {
+	public static long getTime() {
 		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
 	}
 
-	public int getDelta() {
+	public long getDelta() {
 		long time = getTime();
-		int delta = (int) (time - lastFrame);
+		long delta = (time - lastFrame);
 		lastFrame = time;
 		return delta;
 	}

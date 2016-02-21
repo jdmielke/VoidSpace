@@ -14,6 +14,7 @@ public class SpriteSheet {
 
 	public static SpriteSheet playerShips = new SpriteSheet("playerShips.png");
 	public static SpriteSheet pointers = new SpriteSheet("pointers.png");
+	public static SpriteSheet weaponFire = new SpriteSheet("weaponFire.png");
 
 	public SpriteSheet(String path) {
 		try {

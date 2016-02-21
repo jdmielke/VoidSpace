@@ -4,7 +4,7 @@ import com.binary.voidspace.graphics.Sprite;
 
 public abstract class Entity {
 	public int x, y;
-	private boolean removed = false;
+	protected boolean removed = false;
 	protected Sprite sprite;
 	protected float rotation;
 

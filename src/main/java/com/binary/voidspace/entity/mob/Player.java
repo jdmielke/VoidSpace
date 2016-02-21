@@ -1,19 +1,27 @@
 package com.binary.voidspace.entity.mob;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.lwjgl.input.Keyboard;
 
 import com.binary.voidspace.Game;
+import com.binary.voidspace.entity.IcarusPrimaryWeapon;
 import com.binary.voidspace.graphics.Sprite;
 
 public class Player extends Mob {
 
 	protected String username;
 	protected int acceleration = 20;
+	public static List<IcarusPrimaryWeapon> shotsFired;
 
 	public Player(Sprite sprite, int x, int y) {
 		this.sprite = sprite;
 		this.x = x;
 		this.y = y;
+		if(sprite == Sprite.icarus) {
+			shotsFired = new ArrayList<IcarusPrimaryWeapon>();
+		}
 	}
 
 	public void generatePosition() {
