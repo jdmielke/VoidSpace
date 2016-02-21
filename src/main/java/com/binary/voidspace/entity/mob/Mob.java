@@ -3,20 +3,20 @@ package com.binary.voidspace.entity.mob;
 import com.binary.voidspace.entity.Entity;
 
 public abstract class Mob extends Entity {
-	
-	/**speed x direction*/
+
+	/** speed x direction */
 	protected float dx;
-	/**speed y direction*/
+	/** speed y direction */
 	protected float dy;
-	
+
 	public void move(float delta) {
 		x += dx * delta;
 		y += dy * delta;
 	}
-	
+
 	public void update() {
 	}
-	
+
 	public float getDx() {
 		return dx;
 	}
